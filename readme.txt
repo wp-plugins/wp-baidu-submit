@@ -4,7 +4,7 @@ Contributors: Include
 Tags: Baidu,Sitemap,Linksubmit,Seo
 Requires at least: 3.0
 Tested up to: 4.1.1
-Stable tag: trunk
+Stable tag: 1.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Donate link: http://www.170mv.com
@@ -26,7 +26,8 @@ After installing WP BaiDu Submit, you can quickly and completely submit webpages
 == Screenshots ==
 
 1. WP BaiDu Submit设置选项面板截图
-2. 百度站长平台WP BaiDu Submit推送效果截图
+2. 提交结果记录和百度蜘蛛抓取状态记录截图
+3. 百度站长平台WP BaiDu Submit推送效果截图
 
 
 == Frequently Asked Questions ==
@@ -75,6 +76,10 @@ WP BaiDu Submit永久完全免费。
 暂无
 
 == Changelog ==
+
+= 1.1 =
+* [新增]每日提交结果记录；
+* [新增]每日百度蜘蛛抓取网址记录；
 
 = 1.0 =
 * [新增]自动提交最新发布文章链接到百度；
