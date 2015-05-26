@@ -4,12 +4,12 @@ Contributors: Include
 Tags: Baidu,Sitemap,Linksubmit,Seo
 Requires at least: 3.0
 Tested up to: 4.1.1
-Stable tag: 1.1
+Stable tag: 1.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Donate link: http://www.170mv.com
 
-WP BaiDu Submit帮助获得百度站长Sitemap权限的用户自动提交最新文章，加速百度收录。
+WP BaiDu Submit帮助具有百度站长平台链接提交权限的用户自动提交最新文章，以保证新链接可以及时被百度收录。
 
 
 == Description ==
@@ -46,7 +46,7 @@ WP BaiDu Submit永久完全免费。
 
 = 什么样的网站可以使用WP BaiDu Submit？ =
 
-网站使用WP BaiDu Submit前，需要在百度站长平台获得Sitemap权限，有主动推送(实时)接口。
+网站使用WP BaiDu Submit前，需要在百度站长平台获得Sitemap权限，有主动推送(实时)接口，关于主动推送的官方介绍：http://zhanzhang.baidu.com/college/articleinfo?id=336。
  
 = 如何填写站点准入密匙？ =
 
@@ -76,6 +76,11 @@ WP BaiDu Submit永久完全免费。
 暂无
 
 == Changelog ==
+
+= 1.1 =
+* [新增]开启提交结果记录控制选项；
+* [修复]修复快速编辑时更新文章重复提交的BUG；
+* [优化]几处代码优化
 
 = 1.1 =
 * [新增]每日提交结果记录；

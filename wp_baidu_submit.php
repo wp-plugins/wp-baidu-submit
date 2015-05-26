@@ -1,18 +1,18 @@
 <?php
 /*
 Plugin Name: WP BaiDu Submit
-Description: WP BaiDu Submit帮助获得百度站长Sitemap权限的用户自动提交最新文章，加速百度收录。
-Version: 1.1
+Description: WP BaiDu Submit帮助具有百度站长平台链接提交权限的用户自动提交最新文章，以保证新链接可以及时被百度收录。
+Version: 1.2
 Plugin URI: https://wordpress.org/plugins/wp-baidu-submit/
 Author: Include
 Author URI: http://www.170mv.com/
 */
 /*
 Publish Date: 2015-05-09
-Last Update: 2015-05-15
+Last Update: 2015-05-27
 */
 date_default_timezone_set('Asia/Shanghai');
-add_action('publish_post', 'publish_bd_submit', 0);
+add_action('publish_post', 'publish_bd_submit');
 function publish_bd_submit($post_ID){
 	global $post;
 	$bd_submit_enabled = get_option('bd_submit_enabled');
@@ -21,7 +21,8 @@ function publish_bd_submit($post_ID){
 		$bd_submit_token = get_option('bd_submit_token');
 		if( empty($post_ID) || empty($bd_submit_site) || empty($bd_submit_token) ) return;
 		$api = 'http://data.zz.baidu.com/urls?site='.$bd_submit_site.'&token='.$bd_submit_token;
-		if( $post->post_status != "publish" ){
+		$status = $post->post_status;
+		if($status != '' && $status != 'publish'){
 			$url = get_permalink($post_ID);
 			$ch = curl_init();
 			$options =  array(
@@ -33,6 +34,8 @@ function publish_bd_submit($post_ID){
 			);
 			curl_setopt_array($ch, $options);
 			$result = curl_exec($ch);
+			$bd_submit_log_enabled = get_option('bd_submit_log_enabled');
+			if(!$bd_submit_log_enabled) return;
 			$result = json_decode($result, true);
 			if($result['message']){
 				update_option('bd_submit_error',$result['message']);
@@ -40,11 +43,13 @@ function publish_bd_submit($post_ID){
 			if($result['success']){
 				delete_option('bd_submit_error');
 				$time = nowtime();
-				$file = dirname(__FILE__).'/submit_log.txt';
-				if(date('Y-m-d',filemtime($file)) != date('Y-m-d')){
-					$handle = fopen($file,"w");
+				$submit_file = dirname(__FILE__).'/submit_log.txt';
+				$robots_file = dirname(__FILE__).'/robots_log.txt';  
+				if(date('Y-m-d',filemtime($submit_file)) != date('Y-m-d')){
+					file_put_contents($robots_file, '');
+					$handle = fopen($submit_file,"w");
 				}else{
-					$handle = fopen($file,"a");
+					$handle = fopen($submit_file,"a");
 				}
 				fwrite($handle,"$time|$url||");
 				fclose($handle);
@@ -54,18 +59,22 @@ function publish_bd_submit($post_ID){
 }
 
 add_action('wp_footer', 'robots_log');
-function robots_log(){
+function robots_log($post_ID){
+	$bd_submit_log_enabled = get_option('bd_submit_log_enabled');
+	if(!$bd_submit_log_enabled) return;
 	$searchbot = get_naps_bot();
 	if ($searchbot) {
 		$tlc_thispage = addslashes($_SERVER['HTTP_USER_AGENT']);  
-		$url = $_SERVER['HTTP_REFERER'];  
-		$file = dirname(__FILE__).'/robots_log.txt';  
+		$url = $_SERVER['HTTP_REFERER']; 
+		$submit_file = dirname(__FILE__).'/submit_log.txt';
+		$robots_file = dirname(__FILE__).'/robots_log.txt';  
 		$time = nowtime();
 		$PR = home_url().$_SERVER['REQUEST_URI']; 
-		if(date('Y-m-d',filemtime($file)) != date('Y-m-d')){
-			$handle = fopen($file,"w");
+		if(date('Y-m-d',filemtime($robots_file)) != date('Y-m-d')){
+			file_put_contents($submit_file, '');
+			$handle = fopen($robots_file,"w");
 		}else{
-			$handle = fopen($file,"a");
+			$handle = fopen($robots_file,"a");
 		} 
 		fwrite($handle,"$time|$searchbot|$PR||");  
 		fclose($handle);
@@ -74,7 +83,6 @@ function robots_log(){
 
 add_action('admin_menu', 'bd_submit_add_page');
 function bd_submit_add_page() {
-	//add_options_page('WP BaiDu Submit选项', 'WP BaiDu Submit', 'manage_options', 'bd_submit', 'bd_submit_do_page');
 	add_menu_page( 'WP BaiDu Submit 设置', 'BaiDu Submit', 'manage_options', 'wp_baidu_submit', 'bd_submit_settings' );
 	add_submenu_page('wp_baidu_submit', 'WP BaiDu Submit 设置', '设置', 'manage_options', 'wp_baidu_submit', 'bd_submit_settings' );
 	add_submenu_page('wp_baidu_submit', 'WP BaiDu Submit 提交结果', '提交结果', 'manage_options', 'wp_baidu_submit_result', 'bd_submit_result' );
@@ -84,20 +92,26 @@ function bd_submit_settings() {
 		$bd_submit_site = trim($_POST['bd_submit_site']);
 		$bd_submit_token = trim($_POST['bd_submit_token']);
 		$bd_submit_enabled = $_POST['bd_submit_enabled'];
+		$bd_submit_log_enabled = $_POST['bd_submit_log_enabled'];
 		if( empty($bd_submit_site) || empty($bd_submit_token) ){
 			$bd_submit_enabled = 0;
+		}
+		if( empty($bd_submit_site) || empty($bd_submit_token) || $bd_submit_enabled == 0 ){
+			$bd_submit_log_enabled = 0;
 		}
 		update_option('bd_submit_site',$bd_submit_site);
 		update_option('bd_submit_token',$bd_submit_token);
 		update_option('bd_submit_enabled',$bd_submit_enabled);
+		update_option('bd_submit_log_enabled',$bd_submit_log_enabled);
 	}else{
 		$bd_submit_site = get_option('bd_submit_site');
 		$bd_submit_token = get_option('bd_submit_token');
 		$bd_submit_enabled = get_option('bd_submit_enabled');
+		$bd_submit_log_enabled = get_option('bd_submit_log_enabled');
 	}
 ?>
 	<div class="wrap">
-		<h2 style="border-bottom: 1px solid #DFDFDF;">WP BaiDu Submit 1.1</h2>
+		<h2 style="border-bottom: 1px solid #DFDFDF;">WP BaiDu Submit 1.2</h2>
 		<ul class="subsubsub" style="float:none;">
 		<li style="padding-right:20px"> <a href="admin.php?page=wp_baidu_submit" class="current">设置</a></li>
 		<li style="padding-right:20px"> <a href="admin.php?page=wp_baidu_submit_result">提交结果</a></li>
@@ -122,6 +136,14 @@ function bd_submit_settings() {
 					</label>
 					</td>
 				</tr>
+				<tr valign="top"><th scope="row">开启提交记录？</th>
+					<td>
+					<label for="bd_submit_log_enabled">
+					<input name="bd_submit_log_enabled" type="checkbox" <?php if($bd_submit_log_enabled) echo "checked"; ?> id="bd_submit_log_enabled" value="1" />
+					是否开启提交记录，勾选开启，仅记录当日提交结果
+					</label>
+					</td>
+				</tr>
 				<tr valign="top"><th scope="row">自动提交使用建议</th>
 					<td>
 					建议：在发布高质量文章前开启，大量自动提交垃圾文章可能导致失去权限。
@@ -140,6 +162,7 @@ function bd_submit_result() {
 	$robots_log_file = dirname(__FILE__).'/robots_log.txt';
 	$submit_log_file = dirname(__FILE__).'/submit_log.txt';
 	$bd_submit_error = get_option('bd_submit_error');
+	$bd_submit_log_enabled = get_option('bd_submit_log_enabled');
 ?>
 
 <style type="text/css">
@@ -152,6 +175,9 @@ function bd_submit_result() {
 	<li style="padding-right:20px"> <a href="admin.php?page=wp_baidu_submit">设置</a></li>
 	<li style="padding-right:20px"> <a href="admin.php?page=wp_baidu_submit_result" class="current">提交结果</a></li>
 	</ul>
+<?php
+	if($bd_submit_log_enabled){
+?>
 	<h3>提交成功记录</h3>
 	<table id="urlstat" class="form-table">
 	<tbody>
@@ -195,10 +221,13 @@ function bd_submit_result() {
 	<table class="form-table">
 		<tr valign="top"><th scope="row">提交返回错误</th>
 			<td>
-			错误信息：<?php if($bd_submit_error){  echo $bd_submit_error; }else{ echo '恭喜，目前没有错误信息'; } ?>
+			错误信息：<?php if($bd_submit_error){  echo '<font color="red">'.$bd_submit_error.'</font>'; }else{ echo '<font color="green">恭喜，目前没有错误信息</font>'; } ?>
 			</td>
 		</tr>
-	</table>	
+	</table>
+<?php }else{ ?>
+	<h3>未开启提交记录</h3>
+<?php } ?>
 </div>
 <?php
 }
