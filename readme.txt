@@ -4,7 +4,7 @@ Contributors: Include
 Tags: Baidu,Sitemap,Linksubmit,Seo
 Requires at least: 3.0
 Tested up to: 4.1.1
-Stable tag: 1.2
+Stable tag: 1.2.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Donate link: http://www.170mv.com
@@ -77,7 +77,10 @@ WP BaiDu Submit永久完全免费。
 
 == Changelog ==
 
-= 1.1 =
+= 1.2.1 =
+* [完善]几处代码完善
+
+= 1.2 =
 * [新增]开启提交结果记录控制选项；
 * [修复]修复快速编辑时更新文章重复提交的BUG；
 * [优化]几处代码优化

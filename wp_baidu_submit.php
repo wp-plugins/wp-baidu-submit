@@ -2,7 +2,7 @@
 /*
 Plugin Name: WP BaiDu Submit
 Description: WP BaiDu Submit帮助具有百度站长平台链接提交权限的用户自动提交最新文章，以保证新链接可以及时被百度收录。
-Version: 1.2
+Version: 1.2.1
 Plugin URI: https://wordpress.org/plugins/wp-baidu-submit/
 Author: Include
 Author URI: http://www.170mv.com/
@@ -111,7 +111,7 @@ function bd_submit_settings() {
 	}
 ?>
 	<div class="wrap">
-		<h2 style="border-bottom: 1px solid #DFDFDF;">WP BaiDu Submit 1.2</h2>
+		<h2 style="border-bottom: 1px solid #DFDFDF;">WP BaiDu Submit 1.2.1</h2>
 		<ul class="subsubsub" style="float:none;">
 		<li style="padding-right:20px"> <a href="admin.php?page=wp_baidu_submit" class="current">设置</a></li>
 		<li style="padding-right:20px"> <a href="admin.php?page=wp_baidu_submit_result">提交结果</a></li>
@@ -164,69 +164,73 @@ function bd_submit_result() {
 	$bd_submit_error = get_option('bd_submit_error');
 	$bd_submit_log_enabled = get_option('bd_submit_log_enabled');
 ?>
-
-<style type="text/css">
-#urlstat { border: 1px solid #DDDDDD; border-collapse:collapse; }
-#urlstat th, #urlstat td { border:1px solid #DDDDDD; padding: 5px 15px; text-align: center; }
-</style>
-<div class="wrap">
-	<h2 style="border-bottom: 1px solid #DFDFDF;">WP BaiDu Submit 1.1</h2>
-	<ul class="subsubsub" style="float:none;">
-	<li style="padding-right:20px"> <a href="admin.php?page=wp_baidu_submit">设置</a></li>
-	<li style="padding-right:20px"> <a href="admin.php?page=wp_baidu_submit_result" class="current">提交结果</a></li>
-	</ul>
+		<style type="text/css">
+		#urlstat { border: 1px solid #DDDDDD; border-collapse:collapse; }
+		#urlstat th, #urlstat td { border:1px solid #DDDDDD; padding: 5px 15px; text-align: center; }
+		</style>
+		<div class="wrap">
+		<h2 style="border-bottom: 1px solid #DFDFDF;">WP BaiDu Submit 1.1</h2>
+		<ul class="subsubsub" style="float:none;">
+		<li style="padding-right:20px"> <a href="admin.php?page=wp_baidu_submit">设置</a></li>
+		<li style="padding-right:20px"> <a href="admin.php?page=wp_baidu_submit_result" class="current">提交结果</a></li>
+		</ul>
 <?php
 	if($bd_submit_log_enabled){
+		if(!is_writable($submit_log_file) || !is_writable($robots_log_file)){
 ?>
-	<h3>提交成功记录</h3>
-	<table id="urlstat" class="form-table">
-	<tbody>
-	<tr><th>提交网址</th><th>提交状态</th><th>提交时间</th><th>抓取状态</th><th>抓取时间</th></tr>
-<?php
-	if(file_exists($submit_log_file) && file_exists($robots_log_file)){
-		$robots_log = file_get_contents($robots_log_file);
-		$robots_log_info = explode('||',$robots_log);
-		$submit_log = file_get_contents($submit_log_file);
-		$submit_log_info = explode('||',$submit_log);
-		$robots_log_url  = array();
-		$submit_log_url  = array();
-		foreach($robots_log_info as $value){
-			trim($value) && $robots_log_url[] = explode("|",$value);
-		}
-		foreach($submit_log_info as $value){
-			trim($value) && $submit_log_url[] = explode("|",$value);
-		}
-		foreach ($submit_log_url as $url) {
-			if(!empty($url['1'])){
-				foreach($robots_log_url as $a){
-					if($a['2'] == $url['1']){
-						echo '<tr><td>'.$url['1'].'</td><td>成功</td><td>'.$url['0'].'</td><td>已抓取</td><td>'.$a['0'].'</td></tr>';
-						$is = 1;
-						break;
-					}else{
-						$is = 0;
+		<h3>提交成功记录</h3>
+		<font color="red">插件目录下的文件：robots_log.txt、submit_log.txt不可写，请修改文件权限允许写入。</font>
+<?php }else{ ?>
+		<h3>提交成功记录</h3>
+		<table id="urlstat" class="form-table">
+		<tbody>
+		<tr><th>提交网址</th><th>提交状态</th><th>提交时间</th><th>抓取状态</th><th>抓取时间</th></tr>
+			<?php
+				if(file_exists($submit_log_file) && file_exists($robots_log_file)){
+					$robots_log = file_get_contents($robots_log_file);
+					$robots_log_info = explode('||',$robots_log);
+					$submit_log = file_get_contents($submit_log_file);
+					$submit_log_info = explode('||',$submit_log);
+					$robots_log_url  = array();
+					$submit_log_url  = array();
+					foreach($robots_log_info as $value){
+						trim($value) && $robots_log_url[] = explode("|",$value);
+					}
+					foreach($submit_log_info as $value){
+						trim($value) && $submit_log_url[] = explode("|",$value);
+					}
+					foreach ($submit_log_url as $url) {
+						if(!empty($url['1'])){
+							foreach($robots_log_url as $a){
+								if($a['2'] == $url['1']){
+									echo '<tr><td>'.$url['1'].'</td><td>成功</td><td>'.$url['0'].'</td><td>已抓取</td><td>'.$a['0'].'</td></tr>';
+									$is = 1;
+									break;
+								}else{
+									$is = 0;
+								}
+							}
+							if($is == 0){
+								echo '<tr><td>'.$url['1'].'</td><td>成功</td><td>'.$url['0'].'</td><td>未抓取</td><td>无</td></tr>';
+							}
+						}
 					}
 				}
-				if($is == 0){
-					echo '<tr><td>'.$url['1'].'</td><td>成功</td><td>'.$url['0'].'</td><td>未抓取</td><td>无</td></tr>';
-				}
-			}
-		}
-	}
-?>
-	</tbody>
-	</table>
-	<br />
-	<h3>错误信息记录</h3>
-	<table class="form-table">
-		<tr valign="top"><th scope="row">提交返回错误</th>
-			<td>
-			错误信息：<?php if($bd_submit_error){  echo '<font color="red">'.$bd_submit_error.'</font>'; }else{ echo '<font color="green">恭喜，目前没有错误信息</font>'; } ?>
-			</td>
-		</tr>
-	</table>
+			?>
+		</tbody>
+		</table>
+		<br />
+<?php } ?>
+		<h3>错误信息记录</h3>
+		<table class="form-table">
+			<tr valign="top"><th scope="row">提交返回错误</th>
+				<td>
+				错误信息：<?php if($bd_submit_error){  echo '<font color="red">'.$bd_submit_error.'</font>'; }else{ echo '<font color="green">恭喜，目前没有错误信息</font>'; } ?>
+				</td>
+			</tr>
+		</table>
 <?php }else{ ?>
-	<h3>未开启提交记录</h3>
+		<h3>未开启提交记录</h3>
 <?php } ?>
 </div>
 <?php
