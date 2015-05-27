@@ -170,7 +170,7 @@ function bd_submit_result() {
 #urlstat th, #urlstat td { border:1px solid #DDDDDD; padding: 5px 15px; text-align: center; }
 </style>
 <div class="wrap">
-	<h2 style="border-bottom: 1px solid #DFDFDF;">WP BaiDu Submit 1.1</h2>
+	<h2 style="border-bottom: 1px solid #DFDFDF;">WP BaiDu Submit 1.2</h2>
 	<ul class="subsubsub" style="float:none;">
 	<li style="padding-right:20px"> <a href="admin.php?page=wp_baidu_submit">设置</a></li>
 	<li style="padding-right:20px"> <a href="admin.php?page=wp_baidu_submit_result" class="current">提交结果</a></li>
